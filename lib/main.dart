@@ -43,12 +43,36 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   double _totalStocksCost = 0;
 
   final Map<String, Map<String, dynamic>> _stockInfo = {
-    'SBER': {'name': 'Сбербанк', 'lotSize': 10},
-    'GMKN': {'name': 'Норникель', 'lotSize': 10},
-    'PHOR': {'name': 'Фосагро', 'lotSize': 1},
-    'SNGSP': {'name': 'Сургутнефтегаз-п', 'lotSize': 10},
-    'NVTK': {'name': 'Новатэк', 'lotSize': 1},
-    'PLZL': {'name': 'Полюс', 'lotSize': 1},
+    'SBER': {
+      'name': 'Сбербанк',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
+    'GMKN': {
+      'name': 'Норникель',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
+    'PHOR': {
+      'name': 'Фосагро',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'SNGSP': {
+      'name': 'Сургутнефтегаз-п',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
+    'NVTK': {
+      'name': 'Новатэк',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'PLZL': {
+      'name': 'Полюс',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
   };
 
   Map<String, double?> stockPrices = {};
@@ -227,24 +251,93 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     FocusScope.of(context).unfocus();
     double totalAmount = double.tryParse(_totalAmountController.text) ?? 0;
 
+    // Получаем суммы уже купленных акций
+    Map<String, double> currentInvestments = {};
+    for (var entry in _stockInfo.entries) {
+      double value = double.tryParse(entry.value['controller'].text) ?? 0;
+      currentInvestments[entry.key] = value;
+    }
+
+    // Рассчитываем текущее распределение
+    double totalInvested = currentInvestments.values.fold(
+      0,
+      (sum, value) => sum + value,
+    );
+    if (totalInvested <= 0) totalInvested = 1; // избегаем деления на ноль
+
+    Map<String, double> currentDistribution = {};
+    for (var entry in currentInvestments.entries) {
+      currentDistribution[entry.key] = entry.value / totalInvested;
+    }
+
+    // Рассчитываем отклонение от целевого распределения
+    Map<String, double> deviation = {};
+    for (var entry in stocksDistribution.entries) {
+      deviation[entry.key] =
+          entry.value - (currentDistribution[entry.key] ?? 0);
+    }
+
+    // Сортируем акции по отклонению (наибольшее отклонение в начале списка)
+    var sortedEntries = deviation.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
     stockLots.clear();
     actualAllocation.clear();
     _totalStocksCost = 0;
+    double remainingAmount = totalAmount;
 
-    for (final ticker in stocksDistribution.keys) {
+    // Распределяем средства сначала на самые отстающие акции
+    for (var entry in sortedEntries) {
+      final ticker = entry.key;
       final price = stockPrices[ticker];
-      if (price == null || price <= 0) continue;
+      if (price == null || price <= 0 || remainingAmount <= 0) continue;
 
       final lotSize = _stockInfo[ticker]!['lotSize'];
       final minLotCost = price * lotSize;
-      final idealAmount = totalAmount * stocksDistribution[ticker]!;
 
-      int lots = (idealAmount / minLotCost).round();
+      // Целевая сумма для этой акции с учетом уже вложенных средств
+      double targetAmount =
+          (totalInvested + totalAmount) * stocksDistribution[ticker]!;
+      double amountToInvest = (targetAmount - currentInvestments[ticker]!)
+          .clamp(0, remainingAmount);
+
+      if (amountToInvest <= 0) continue;
+
+      int lots = (amountToInvest / minLotCost).floor();
+      if (lots <= 0) continue;
+
       double actualAmount = lots * minLotCost;
 
       stockLots[ticker] = lots;
       actualAllocation[ticker] = actualAmount;
       _totalStocksCost += actualAmount;
+      remainingAmount -= actualAmount;
+    }
+
+    // Если остались средства после приоритетного распределения, распределяем пропорционально
+    if (remainingAmount > 0) {
+      for (var entry in stocksDistribution.entries) {
+        final ticker = entry.key;
+        final price = stockPrices[ticker];
+        if (price == null || price <= 0 || remainingAmount <= 0) continue;
+
+        final lotSize = _stockInfo[ticker]!['lotSize'];
+        final minLotCost = price * lotSize;
+
+        // Рассчитываем сколько еще можно купить для приближения к целевому распределению
+        double idealAmount = remainingAmount * entry.value;
+        int additionalLots = (idealAmount / minLotCost).floor();
+
+        if (additionalLots <= 0) continue;
+
+        double additionalAmount = additionalLots * minLotCost;
+
+        stockLots[ticker] = (stockLots[ticker] ?? 0) + additionalLots;
+        actualAllocation[ticker] =
+            (actualAllocation[ticker] ?? 0) + additionalAmount;
+        _totalStocksCost += additionalAmount;
+        remainingAmount -= additionalAmount;
+      }
     }
 
     setState(() {});
@@ -258,6 +351,9 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     _currentGoldController.dispose();
     _newFundsController.dispose();
     _totalAmountController.dispose();
+    for (var entry in _stockInfo.entries) {
+      entry.value['controller'].dispose();
+    }
     super.dispose();
   }
 
@@ -421,6 +517,31 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
               suffixText: 'руб.',
             ),
           ),
+          const SizedBox(height: 20),
+          const Text(
+            'Уже купленные акции:',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 10),
+          ..._stockInfo.entries.map((entry) {
+            final ticker = entry.key;
+            final name = entry.value['name'];
+            final controller =
+                entry.value['controller'] as TextEditingController;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: name,
+                  border: const OutlineInputBorder(),
+                  suffixText: 'руб.',
+                ),
+              ),
+            );
+          }),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: _calculateStockPurchase,
