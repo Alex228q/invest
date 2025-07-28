@@ -34,6 +34,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       TextEditingController();
   final TextEditingController _currentBondsController = TextEditingController();
   final TextEditingController _currentGoldController = TextEditingController();
+  final TextEditingController _currentYanController = TextEditingController();
   final TextEditingController _newFundsController = TextEditingController();
   final TextEditingController _totalAmountController = TextEditingController();
 
@@ -64,15 +65,17 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   };
 
   Map<String, double> allocationResults = {
-    'Акции (50%)': 0,
-    'Облигации (30%)': 0,
+    'Акции (45%)': 0,
+    'Облигации (25%)': 0,
     'Золото (20%)': 0,
+    'Юани (10%)': 0,
   };
 
   Map<String, double> buyRecommendations = {
     'Акции': 0,
     'Облигации': 0,
     'Золото': 0,
+    'Юани': 0,
   };
 
   @override
@@ -142,40 +145,81 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     double currentStocks = double.tryParse(_currentStocksController.text) ?? 0;
     double currentBonds = double.tryParse(_currentBondsController.text) ?? 0;
     double currentGold = double.tryParse(_currentGoldController.text) ?? 0;
+    double currentYan = double.tryParse(_currentYanController.text) ?? 0;
     double newFunds = double.tryParse(_newFundsController.text) ?? 0;
 
     double totalPortfolio =
-        currentStocks + currentBonds + currentGold + newFunds;
+        currentStocks + currentBonds + currentGold + currentYan + newFunds;
 
-    double targetStocks = totalPortfolio * 0.5;
-    double targetBonds = totalPortfolio * 0.3;
+    // Целевые суммы для каждого актива
+    double targetStocks = totalPortfolio * 0.45;
+    double targetBonds = totalPortfolio * 0.25;
     double targetGold = totalPortfolio * 0.2;
+    double targetYan = totalPortfolio * 0.1;
 
-    double buyStocks = (targetStocks - currentStocks).clamp(0, double.infinity);
-    double buyBonds = (targetBonds - currentBonds).clamp(0, double.infinity);
-    double buyGold = (targetGold - currentGold).clamp(0, double.infinity);
+    // Сколько нужно докупить для каждого актива
+    double needStocks = (targetStocks - currentStocks).clamp(
+      0,
+      double.infinity,
+    );
+    double needBonds = (targetBonds - currentBonds).clamp(0, double.infinity);
+    double needGold = (targetGold - currentGold).clamp(0, double.infinity);
+    double needYan = (targetYan - currentYan).clamp(0, double.infinity);
 
-    double totalToBuy = buyStocks + buyBonds + buyGold;
+    double totalNeed = needStocks + needBonds + needGold + needYan;
+    double remainingFunds = newFunds;
 
-    setState(() {
-      buyRecommendations = {
-        'Акции': buyStocks,
-        'Облигации': buyBonds,
-        'Золото': buyGold,
-      };
+    // Если средств хватает - покупаем всё что нужно
+    if (remainingFunds >= totalNeed) {
+      setState(() {
+        buyRecommendations = {
+          'Акции': needStocks,
+          'Облигации': needBonds,
+          'Золото': needGold,
+          'Юани': needYan,
+        };
 
-      allocationResults = {
-        'Акции (50%)': targetStocks,
-        'Облигации (30%)': targetBonds,
-        'Золото (20%)': targetGold,
-      };
-
-      if (totalToBuy > newFunds) {
-        _error =
-            'Недостаточно средств для ребалансировки!\nНужно ещё ${(totalToBuy - newFunds).toStringAsFixed(2)} руб.';
-      } else {
         _error = null;
-      }
+      });
+    }
+    // Если средств не хватает - распределяем пропорционально целям
+    else {
+      // Коэффициент распределения (сколько от необходимого мы можем купить)
+      double ratio = remainingFunds / totalNeed;
+
+      setState(() {
+        buyRecommendations = {
+          'Акции': needStocks * ratio,
+          'Облигации': needBonds * ratio,
+          'Золото': needGold * ratio,
+          'Юани': needYan * ratio,
+        };
+
+        _error =
+            'Недостаточно средств для полной ребалансировки!\n'
+            'Средства распределены пропорционально целевому распределению.\n'
+            'Для полной ребалансировки нужно ещё ${(totalNeed - remainingFunds).toStringAsFixed(2)} руб.';
+      });
+    }
+
+    // Обновляем фактические суммы с учетом купленного
+    double actualStocks = currentStocks + buyRecommendations['Акции']!;
+    double actualBonds = currentBonds + buyRecommendations['Облигации']!;
+    double actualGold = currentGold + buyRecommendations['Золото']!;
+    double actualYan = currentYan + buyRecommendations['Юани']!;
+
+    // Обновляем отображение распределения
+    setState(() {
+      allocationResults = {
+        'Акции (${(actualStocks / totalPortfolio * 100).toStringAsFixed(1)}%)':
+            actualStocks,
+        'Облигации (${(actualBonds / totalPortfolio * 100).toStringAsFixed(1)}%)':
+            actualBonds,
+        'Золото (${(actualGold / totalPortfolio * 100).toStringAsFixed(1)}%)':
+            actualGold,
+        'Юани (${(actualYan / totalPortfolio * 100).toStringAsFixed(1)}%)':
+            actualYan,
+      };
     });
   }
 
@@ -209,6 +253,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   @override
   void dispose() {
     _currentStocksController.dispose();
+    _currentYanController.dispose();
     _currentBondsController.dispose();
     _currentGoldController.dispose();
     _newFundsController.dispose();
@@ -268,6 +313,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
               labelText: 'Текущая сумма в золоте',
+              border: OutlineInputBorder(),
+              suffixText: 'руб.',
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: _currentYanController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Текущая сумма в юанях',
               border: OutlineInputBorder(),
               suffixText: 'руб.',
             ),
@@ -372,15 +427,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
             child: const Text('Рассчитать покупки'),
           ),
           if (_isLoading) const LinearProgressIndicator(),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text(
-                _error!,
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            ),
+
           const SizedBox(height: 20),
           if (stockLots.isNotEmpty)
             Column(
