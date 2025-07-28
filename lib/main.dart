@@ -314,29 +314,79 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       remainingAmount -= actualAmount;
     }
 
-    // Если остались средства после приоритетного распределения, распределяем пропорционально
+    // Если остались средства после приоритетного распределения
     if (remainingAmount > 0) {
-      for (var entry in stocksDistribution.entries) {
+      // Пытаемся распределить оставшиеся средства на покупку дополнительных лотов
+      bool distributed;
+      do {
+        distributed = false;
+
+        // Распределяем по всем акциям пропорционально их целевому распределению
+        for (var entry in stocksDistribution.entries) {
+          final ticker = entry.key;
+          final price = stockPrices[ticker];
+          if (price == null || price <= 0 || remainingAmount <= 0) continue;
+
+          final lotSize = _stockInfo[ticker]!['lotSize'];
+          final minLotCost = price * lotSize;
+
+          // Если можем купить хотя бы 1 лот
+          if (remainingAmount >= minLotCost) {
+            int additionalLots = (remainingAmount * entry.value / minLotCost)
+                .floor();
+            if (additionalLots <= 0) additionalLots = 1;
+
+            double additionalAmount = additionalLots * minLotCost;
+            if (additionalAmount > remainingAmount) {
+              additionalLots = (remainingAmount / minLotCost).floor();
+              additionalAmount = additionalLots * minLotCost;
+            }
+
+            if (additionalLots > 0) {
+              stockLots[ticker] = (stockLots[ticker] ?? 0) + additionalLots;
+              actualAllocation[ticker] =
+                  (actualAllocation[ticker] ?? 0) + additionalAmount;
+              _totalStocksCost += additionalAmount;
+              remainingAmount -= additionalAmount;
+              distributed = true;
+            }
+          }
+        }
+      } while (distributed && remainingAmount > 0);
+    }
+
+    // Если после всех распределений остались средства (меньше стоимости минимального лота)
+    if (remainingAmount > 0) {
+      // Пробуем добавить к акциям с наименьшей стоимостью лота
+      var sortedByLotPrice = _stockInfo.entries.toList()
+        ..sort((a, b) {
+          double priceA = stockPrices[a.key] ?? double.infinity;
+          double priceB = stockPrices[b.key] ?? double.infinity;
+          return (priceA * a.value['lotSize']).compareTo(
+            priceB * b.value['lotSize'],
+          );
+        });
+
+      for (var entry in sortedByLotPrice) {
         final ticker = entry.key;
         final price = stockPrices[ticker];
         if (price == null || price <= 0 || remainingAmount <= 0) continue;
 
-        final lotSize = _stockInfo[ticker]!['lotSize'];
+        final lotSize = entry.value['lotSize'];
         final minLotCost = price * lotSize;
 
-        // Рассчитываем сколько еще можно купить для приближения к целевому распределению
-        double idealAmount = remainingAmount * entry.value;
-        int additionalLots = (idealAmount / minLotCost).floor();
-
-        if (additionalLots <= 0) continue;
-
-        double additionalAmount = additionalLots * minLotCost;
-
-        stockLots[ticker] = (stockLots[ticker] ?? 0) + additionalLots;
-        actualAllocation[ticker] =
-            (actualAllocation[ticker] ?? 0) + additionalAmount;
-        _totalStocksCost += additionalAmount;
-        remainingAmount -= additionalAmount;
+        if (remainingAmount >= minLotCost) {
+          int additionalLots = (remainingAmount / minLotCost).floor();
+          if (additionalLots > 0) {
+            double additionalAmount = additionalLots * minLotCost;
+            stockLots[ticker] = (stockLots[ticker] ?? 0) + additionalLots;
+            actualAllocation[ticker] =
+                (actualAllocation[ticker] ?? 0) + additionalAmount;
+            _totalStocksCost += additionalAmount;
+            remainingAmount -= additionalAmount;
+            break;
+          }
+        }
       }
     }
 
