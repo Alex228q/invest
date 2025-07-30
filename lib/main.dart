@@ -92,14 +92,14 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     'Акции (45%)': 0,
     'Облигации (25%)': 0,
     'Золото (20%)': 0,
-    'Юани (10%)': 0,
+    'Валюта (10%)': 0,
   };
 
   Map<String, double> buyRecommendations = {
     'Акции': 0,
     'Облигации': 0,
     'Золото': 0,
-    'Юани': 0,
+    'Валюта': 0,
   };
 
   @override
@@ -200,7 +200,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
           'Акции': needStocks,
           'Облигации': needBonds,
           'Золото': needGold,
-          'Юани': needYan,
+          'Валюта': needYan,
         };
 
         _error = null;
@@ -216,7 +216,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
           'Акции': needStocks * ratio,
           'Облигации': needBonds * ratio,
           'Золото': needGold * ratio,
-          'Юани': needYan * ratio,
+          'Валюта': needYan * ratio,
         };
 
         _error =
@@ -230,7 +230,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     double actualStocks = currentStocks + buyRecommendations['Акции']!;
     double actualBonds = currentBonds + buyRecommendations['Облигации']!;
     double actualGold = currentGold + buyRecommendations['Золото']!;
-    double actualYan = currentYan + buyRecommendations['Юани']!;
+    double actualYan = currentYan + buyRecommendations['Валюта']!;
 
     // Обновляем отображение распределения
     setState(() {
@@ -241,7 +241,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
             actualBonds,
         'Золото (${(actualGold / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualGold,
-        'Юани (${(actualYan / totalPortfolio * 100).toStringAsFixed(1)}%)':
+        'Валюта (${(actualYan / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualYan,
       };
     });
@@ -468,7 +468,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
             controller: _currentYanController,
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(
-              labelText: 'Текущая сумма в юанях',
+              labelText: 'Текущая сумма в валюте',
               border: OutlineInputBorder(),
               suffixText: 'руб.',
             ),
