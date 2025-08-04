@@ -45,7 +45,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   final Map<String, Map<String, dynamic>> _stockInfo = {
     'SBER': {
       'name': 'Сбербанк',
-      'lotSize': 10,
+      'lotSize': 1,
       'controller': TextEditingController(),
     },
     'GMKN': {
@@ -129,17 +129,17 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
           double? lastPrice;
 
           if (ticker == "SBER") {
-            lastPrice = marketData[2][12]?.toDouble();
+            lastPrice = marketData[1][2]?.toDouble();
           } else if (ticker == "GMKN") {
-            lastPrice = marketData[2][12]?.toDouble();
+            lastPrice = marketData[2][2]?.toDouble();
           } else if (ticker == "PHOR") {
-            lastPrice = marketData[1][12]?.toDouble();
+            lastPrice = marketData[1][2]?.toDouble();
           } else if (ticker == "SNGSP") {
-            lastPrice = marketData[2][12]?.toDouble();
+            lastPrice = marketData[2][2]?.toDouble();
           } else if (ticker == "NVTK") {
-            lastPrice = marketData[1][12]?.toDouble();
+            lastPrice = marketData[1][4]?.toDouble();
           } else if (ticker == "PLZL") {
-            lastPrice = marketData[1][12]?.toDouble();
+            lastPrice = marketData[1][4]?.toDouble();
           }
 
           setState(() {
