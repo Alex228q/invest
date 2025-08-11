@@ -73,6 +73,46 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
+    'LKOH': {
+      'name': 'Лукойл',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'TATN': {
+      'name': 'Татнефть',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'NLMK': {
+      'name': 'НЛМК',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
+    'MGNT': {
+      'name': 'Магнит',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'MTSS': {
+      'name': 'МТС',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
+    'IRAO': {
+      'name': 'Интер РАО',
+      'lotSize': 100,
+      'controller': TextEditingController(),
+    },
+    'NKNC': {
+      'name': 'Нижнекамскнефтехим',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
+    'ALRS': {
+      'name': 'Алроса',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
   };
 
   Map<String, double?> stockPrices = {};
@@ -80,12 +120,20 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'SBER': 0.15,
-    'SNGSP': 0.15,
-    'NVTK': 0.15,
-    'GMKN': 0.20,
-    'PHOR': 0.20,
-    'PLZL': 0.15,
+    'SBER': 0.05,
+    'SNGSP': 0.05,
+    'NVTK': 0.10,
+    'GMKN': 0.07,
+    'PHOR': 0.10,
+    'PLZL': 0.05,
+    'LKOH': 0.12,
+    'TATN': 0.05,
+    'NLMK': 0.10,
+    'ALRS': 0.05,
+    'MTSS': 0.10,
+    'IRAO': 0.05,
+    'MGNT': 0.05,
+    'NKNC': 0.06,
   };
 
   Map<String, double> allocationResults = {
@@ -118,33 +166,30 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     try {
       for (final ticker in _stockInfo.keys) {
         final url = Uri.parse(
-          'https://iss.moex.com/iss/engines/stock/markets/shares/securities/$ticker.json',
+          'https://iss.moex.com/iss/engines/stock/markets/shares/securities/$ticker.json?iss.meta=off',
         );
         final response = await http.get(url);
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          final marketData = data['marketdata']['data'];
+          final marketData = data['marketdata']['data'] as List;
 
-          double? lastPrice;
+          // Ищем первую запись, где boardid равен "TQBR" или "TQTF"
+          final filteredData = marketData.firstWhere(
+            (d) => ["TQBR", "TQTF"].contains(d[1]),
+            orElse: () => null,
+          );
 
-          if (ticker == "SBER") {
-            lastPrice = marketData[1][2]?.toDouble();
-          } else if (ticker == "GMKN") {
-            lastPrice = marketData[2][2]?.toDouble();
-          } else if (ticker == "PHOR") {
-            lastPrice = marketData[1][2]?.toDouble();
-          } else if (ticker == "SNGSP") {
-            lastPrice = marketData[2][2]?.toDouble();
-          } else if (ticker == "NVTK") {
-            lastPrice = marketData[1][4]?.toDouble();
-          } else if (ticker == "PLZL") {
-            lastPrice = marketData[1][4]?.toDouble();
+          if (filteredData != null) {
+            final lastPrice = filteredData[12]?.toDouble();
+            setState(() {
+              stockPrices[ticker] = lastPrice;
+            });
+          } else {
+            setState(() {
+              _error = 'Не найдены данные для тикера $ticker';
+            });
           }
-
-          setState(() {
-            stockPrices[ticker] = lastPrice;
-          });
         } else {
           setState(() {
             _error = 'Ошибка сервера: ${response.statusCode}';
