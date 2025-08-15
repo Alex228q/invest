@@ -117,8 +117,8 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
 
   Map<String, double> allocationResults = {
     'Акции (45%)': 0,
-    'Облигации (25%)': 0,
-    'Золото (20%)': 0,
+    'Облигации (30%)': 0,
+    'Золото (15%)': 0,
     'Валюта (10%)': 0,
   };
 
@@ -201,9 +201,9 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
 
     // Целевые суммы для каждого актива
     double targetStocks = totalPortfolio * 0.45;
-    double targetBonds = totalPortfolio * 0.25;
-    double targetGold = totalPortfolio * 0.2;
-    double targetYan = totalPortfolio * 0.1;
+    double targetBonds = totalPortfolio * 0.30;
+    double targetGold = totalPortfolio * 0.15;
+    double targetYan = totalPortfolio * 0.10;
 
     // Сколько нужно докупить для каждого актива
     double needStocks = (targetStocks - currentStocks).clamp(
