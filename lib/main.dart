@@ -48,16 +48,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'GMKN': {
-      'name': 'Норникель',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
-    'PHOR': {
-      'name': 'Фосагро',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
+
     'SNGSP': {
       'name': 'Сургутнефтегаз-п',
       'lotSize': 10,
@@ -78,7 +69,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'TATN': {
+    'TATNP': {
       'name': 'Татнефть',
       'lotSize': 1,
       'controller': TextEditingController(),
@@ -88,8 +79,8 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 10,
       'controller': TextEditingController(),
     },
-    'MGNT': {
-      'name': 'Магнит',
+    'T': {
+      'name': 'T Технологии',
       'lotSize': 1,
       'controller': TextEditingController(),
     },
@@ -98,19 +89,10 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 10,
       'controller': TextEditingController(),
     },
-    'IRAO': {
-      'name': 'Интер РАО',
-      'lotSize': 100,
-      'controller': TextEditingController(),
-    },
-    'NKNC': {
-      'name': 'Нижнекамскнефтехим',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
-    'ALRS': {
-      'name': 'Алроса',
-      'lotSize': 10,
+    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
+    'MDMG': {
+      'name': 'Мать и дитя',
+      'lotSize': 1,
       'controller': TextEditingController(),
     },
   };
@@ -120,20 +102,17 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'SBER': 0.05,
-    'SNGSP': 0.05,
-    'NVTK': 0.10,
-    'GMKN': 0.07,
-    'PHOR': 0.10,
-    'PLZL': 0.05,
-    'LKOH': 0.12,
-    'TATN': 0.05,
-    'NLMK': 0.10,
-    'ALRS': 0.05,
-    'MTSS': 0.10,
-    'IRAO': 0.05,
-    'MGNT': 0.05,
-    'NKNC': 0.06,
+    'SBER': 0.12,
+    'LKOH': 0.11,
+    'NVTK': 0.11,
+    'PLZL': 0.10,
+    'TATNP': 0.08,
+    'SNGSP': 0.08,
+    'NLMK': 0.07,
+    'MTSS': 0.08,
+    'X5': 0.08,
+    'T': 0.08,
+    'MDMG': 0.09,
   };
 
   Map<String, double> allocationResults = {
