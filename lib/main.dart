@@ -113,18 +113,17 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     'NVTK': 0.08,
     'PLZL': 0.08,
     'PHOR': 0.06,
-    // финансы 15%
+    // финансы 20%
     'SBER': 0.10,
-    'T': 0.05,
-    // потреб 25%
+    'T': 0.10,
+    // потреб 30%
     'X5': 0.10,
     'MGNT': 0.10,
     'EUTR': 0.05,
+    'MDMG': 0.05,
     //телеком/it 20%
     'MTSS': 0.10,
     'RTKM': 0.10,
-    //здоровье 10%
-    'MDMG': 0.10,
   };
 
   Map<String, double> allocationResults = {
