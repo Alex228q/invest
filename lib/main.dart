@@ -48,7 +48,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-
+    'PHOR': {
+      'name': 'ФосАгро',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
     'NVTK': {
       'name': 'Новатэк',
       'lotSize': 1,
@@ -91,6 +95,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
+    'LIFE': {
+      'name': 'Фармсинтез',
+      'lotSize': 100,
+      'controller': TextEditingController(),
+    },
+    'EUTR': {
+      'name': 'ЕвроТранс',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
   };
 
   Map<String, double?> stockPrices = {};
@@ -99,20 +113,23 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
 
   final Map<String, double> stocksDistribution = {
     // сырье/металлы 30%
-    'LKOH': 0.08,
-    'NVTK': 0.11,
-    'PLZL': 0.11,
+    'LKOH': 0.075,
+    'NVTK': 0.075,
+    'PLZL': 0.075,
+    'PHOR': 0.075,
     // финансы 15%
     'SBER': 0.10,
     'T': 0.05,
-    // потреб 20%
-    'X5': 0.12,
-    'MGNT': 0.08,
+    // потреб 25%
+    'X5': 0.10,
+    'MGNT': 0.10,
+    'EUTR': 0.05,
     //телеком/it 20%
     'MTSS': 0.10,
     'YDEX': 0.10,
-    //здоровье 15%
-    'MDMG': 0.15,
+    //здоровье 10%
+    'MDMG': 0.05,
+    'LIFE': 0.05,
   };
 
   Map<String, double> allocationResults = {
