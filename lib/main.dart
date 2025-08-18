@@ -32,7 +32,7 @@ class InvestmentScreen extends StatefulWidget {
 class _InvestmentScreenState extends State<InvestmentScreen> {
   final TextEditingController _currentStocksController =
       TextEditingController();
-  final TextEditingController _currentBondsController = TextEditingController();
+ 
   final TextEditingController _currentGoldController = TextEditingController();
   final TextEditingController _currentYanController = TextEditingController();
   final TextEditingController _newFundsController = TextEditingController();
@@ -48,7 +48,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-
     'SNGSP': {
       'name': 'Сургутнефтегаз-п',
       'lotSize': 10,
@@ -116,15 +115,13 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   };
 
   Map<String, double> allocationResults = {
-    'Акции (45%)': 0,
-    'Облигации (30%)': 0,
+    'Акции (75%)': 0,
     'Золото (15%)': 0,
     'Валюта (10%)': 0,
   };
 
   Map<String, double> buyRecommendations = {
     'Акции': 0,
-    'Облигации': 0,
     'Золото': 0,
     'Валюта': 0,
   };
@@ -191,17 +188,17 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     FocusScope.of(context).unfocus();
 
     double currentStocks = double.tryParse(_currentStocksController.text) ?? 0;
-    double currentBonds = double.tryParse(_currentBondsController.text) ?? 0;
+    
     double currentGold = double.tryParse(_currentGoldController.text) ?? 0;
     double currentYan = double.tryParse(_currentYanController.text) ?? 0;
     double newFunds = double.tryParse(_newFundsController.text) ?? 0;
 
     double totalPortfolio =
-        currentStocks + currentBonds + currentGold + currentYan + newFunds;
+        currentStocks  + currentGold + currentYan + newFunds;
 
     // Целевые суммы для каждого актива
-    double targetStocks = totalPortfolio * 0.45;
-    double targetBonds = totalPortfolio * 0.30;
+    double targetStocks = totalPortfolio * 0.75;
+ 
     double targetGold = totalPortfolio * 0.15;
     double targetYan = totalPortfolio * 0.10;
 
@@ -210,11 +207,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       0,
       double.infinity,
     );
-    double needBonds = (targetBonds - currentBonds).clamp(0, double.infinity);
+    
     double needGold = (targetGold - currentGold).clamp(0, double.infinity);
     double needYan = (targetYan - currentYan).clamp(0, double.infinity);
 
-    double totalNeed = needStocks + needBonds + needGold + needYan;
+    double totalNeed = needStocks  + needGold + needYan;
     double remainingFunds = newFunds;
 
     // Если средств хватает - покупаем всё что нужно
@@ -222,7 +219,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       setState(() {
         buyRecommendations = {
           'Акции': needStocks,
-          'Облигации': needBonds,
+     
           'Золото': needGold,
           'Валюта': needYan,
         };
@@ -238,7 +235,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       setState(() {
         buyRecommendations = {
           'Акции': needStocks * ratio,
-          'Облигации': needBonds * ratio,
+       
           'Золото': needGold * ratio,
           'Валюта': needYan * ratio,
         };
@@ -252,7 +249,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
 
     // Обновляем фактические суммы с учетом купленного
     double actualStocks = currentStocks + buyRecommendations['Акции']!;
-    double actualBonds = currentBonds + buyRecommendations['Облигации']!;
+    
     double actualGold = currentGold + buyRecommendations['Золото']!;
     double actualYan = currentYan + buyRecommendations['Валюта']!;
 
@@ -261,8 +258,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       allocationResults = {
         'Акции (${(actualStocks / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualStocks,
-        'Облигации (${(actualBonds / totalPortfolio * 100).toStringAsFixed(1)}%)':
-            actualBonds,
+       
         'Золото (${(actualGold / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualGold,
         'Валюта (${(actualYan / totalPortfolio * 100).toStringAsFixed(1)}%)':
@@ -282,133 +278,108 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       currentInvestments[entry.key] = value;
     }
 
-    // Рассчитываем текущее распределение
-    double totalInvested = currentInvestments.values.fold(
+    // Рассчитываем общую сумму текущих инвестиций
+    double totalCurrentInvestments = currentInvestments.values.fold(
       0,
       (sum, value) => sum + value,
     );
-    if (totalInvested <= 0) totalInvested = 1; // избегаем деления на ноль
-
-    Map<String, double> currentDistribution = {};
-    for (var entry in currentInvestments.entries) {
-      currentDistribution[entry.key] = entry.value / totalInvested;
-    }
-
-    // Рассчитываем отклонение от целевого распределения
-    Map<String, double> deviation = {};
-    for (var entry in stocksDistribution.entries) {
-      deviation[entry.key] =
-          entry.value - (currentDistribution[entry.key] ?? 0);
-    }
-
-    // Сортируем акции по отклонению (наибольшее отклонение в начале списка)
-    var sortedEntries = deviation.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
 
     stockLots.clear();
     actualAllocation.clear();
     _totalStocksCost = 0;
     double remainingAmount = totalAmount;
 
-    // Распределяем средства сначала на самые отстающие акции
-    for (var entry in sortedEntries) {
+    // Рассчитываем дефицит для каждой акции
+    Map<String, double> deficit = {};
+    double totalDeficit = 0;
+
+    for (var entry in stocksDistribution.entries) {
       final ticker = entry.key;
-      final price = stockPrices[ticker];
-      if (price == null || price <= 0 || remainingAmount <= 0) continue;
+      final targetFraction = entry.value;
 
-      final lotSize = _stockInfo[ticker]!['lotSize'];
-      final minLotCost = price * lotSize;
-
-      // Целевая сумма для этой акции с учетом уже вложенных средств
+      // Целевая сумма с учетом текущих инвестиций и новых средств
       double targetAmount =
-          (totalInvested + totalAmount) * stocksDistribution[ticker]!;
-      double amountToInvest = (targetAmount - currentInvestments[ticker]!)
-          .clamp(0, remainingAmount);
+          (totalCurrentInvestments + totalAmount) * targetFraction;
 
-      if (amountToInvest <= 0) continue;
+      // Текущие инвестиции в эту акцию
+      double currentAmount = currentInvestments[ticker] ?? 0;
 
-      int lots = (amountToInvest / minLotCost).floor();
-      if (lots <= 0) continue;
+      // Дефицит = сколько нужно докупить до целевой суммы
+      double tickerDeficit = (targetAmount - currentAmount).clamp(
+        0,
+        double.infinity,
+      );
 
-      double actualAmount = lots * minLotCost;
-
-      stockLots[ticker] = lots;
-      actualAllocation[ticker] = actualAmount;
-      _totalStocksCost += actualAmount;
-      remainingAmount -= actualAmount;
+      deficit[ticker] = tickerDeficit;
+      totalDeficit += tickerDeficit;
     }
 
-    // Если остались средства после приоритетного распределения
-    if (remainingAmount > 0) {
-      // Пытаемся распределить оставшиеся средства на покупку дополнительных лотов
-      bool distributed;
-      do {
-        distributed = false;
+    // Распределение средств пропорционально дефициту
+    if (totalDeficit > 0) {
+      for (var entry in deficit.entries) {
+        final ticker = entry.key;
+        final price = stockPrices[ticker];
+        if (price == null || price <= 0) continue;
 
-        // Распределяем по всем акциям пропорционально их целевому распределению
-        for (var entry in stocksDistribution.entries) {
-          final ticker = entry.key;
-          final price = stockPrices[ticker];
-          if (price == null || price <= 0 || remainingAmount <= 0) continue;
+        final lotSize = _stockInfo[ticker]!['lotSize'];
+        final minLotCost = price * lotSize;
 
-          final lotSize = _stockInfo[ticker]!['lotSize'];
-          final minLotCost = price * lotSize;
+        // Пропорция для этой акции
+        double proportion = entry.value / totalDeficit;
 
-          // Если можем купить хотя бы 1 лот
-          if (remainingAmount >= minLotCost) {
-            int additionalLots = (remainingAmount * entry.value / minLotCost)
-                .floor();
-            if (additionalLots <= 0) additionalLots = 1;
+        // Сумма для инвестирования в эту акцию
+        double amountForTicker = totalAmount * proportion;
 
-            double additionalAmount = additionalLots * minLotCost;
-            if (additionalAmount > remainingAmount) {
-              additionalLots = (remainingAmount / minLotCost).floor();
-              additionalAmount = additionalLots * minLotCost;
-            }
+        // Покупаем целое количество лотов
+        int lots = (amountForTicker / minLotCost).floor();
+        if (lots > 0) {
+          double actualAmount = lots * minLotCost;
 
-            if (additionalLots > 0) {
-              stockLots[ticker] = (stockLots[ticker] ?? 0) + additionalLots;
-              actualAllocation[ticker] =
-                  (actualAllocation[ticker] ?? 0) + additionalAmount;
-              _totalStocksCost += additionalAmount;
-              remainingAmount -= additionalAmount;
-              distributed = true;
-            }
-          }
+          stockLots[ticker] = lots;
+          actualAllocation[ticker] = actualAmount;
+          _totalStocksCost += actualAmount;
+          remainingAmount -= actualAmount;
         }
-      } while (distributed && remainingAmount > 0);
+      }
     }
 
-    // Если после всех распределений остались средства (меньше стоимости минимального лота)
+    // Распределение остатка (если есть)
     if (remainingAmount > 0) {
-      // Пробуем добавить к акциям с наименьшей стоимостью лота
-      var sortedByLotPrice = _stockInfo.entries.toList()
+      // Сортируем акции по отклонению от целевой доли (наибольшее отклонение в начале)
+      var sortedByDeviation = stocksDistribution.entries.toList()
         ..sort((a, b) {
-          double priceA = stockPrices[a.key] ?? double.infinity;
-          double priceB = stockPrices[b.key] ?? double.infinity;
-          return (priceA * a.value['lotSize']).compareTo(
-            priceB * b.value['lotSize'],
-          );
+          double currentA =
+              (actualAllocation[a.key] ?? 0) + (currentInvestments[a.key] ?? 0);
+          double currentB =
+              (actualAllocation[b.key] ?? 0) + (currentInvestments[b.key] ?? 0);
+          double targetA = (totalCurrentInvestments + totalAmount) * a.value;
+          double targetB = (totalCurrentInvestments + totalAmount) * b.value;
+
+          double deviationA = (targetA - currentA) / targetA;
+          double deviationB = (targetB - currentB) / targetB;
+
+          return deviationB.compareTo(deviationA);
         });
 
-      for (var entry in sortedByLotPrice) {
+      // Покупаем лоты для акций с наибольшим отклонением
+      for (var entry in sortedByDeviation) {
         final ticker = entry.key;
         final price = stockPrices[ticker];
         if (price == null || price <= 0 || remainingAmount <= 0) continue;
 
-        final lotSize = entry.value['lotSize'];
+        final lotSize = _stockInfo[ticker]!['lotSize'];
         final minLotCost = price * lotSize;
 
         if (remainingAmount >= minLotCost) {
           int additionalLots = (remainingAmount / minLotCost).floor();
           if (additionalLots > 0) {
             double additionalAmount = additionalLots * minLotCost;
+
             stockLots[ticker] = (stockLots[ticker] ?? 0) + additionalLots;
             actualAllocation[ticker] =
                 (actualAllocation[ticker] ?? 0) + additionalAmount;
             _totalStocksCost += additionalAmount;
             remainingAmount -= additionalAmount;
-            break;
           }
         }
       }
@@ -421,7 +392,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   void dispose() {
     _currentStocksController.dispose();
     _currentYanController.dispose();
-    _currentBondsController.dispose();
     _currentGoldController.dispose();
     _newFundsController.dispose();
     _totalAmountController.dispose();
@@ -467,16 +437,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
               suffixText: 'руб.',
             ),
           ),
-          const SizedBox(height: 10),
-          TextField(
-            controller: _currentBondsController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'Текущая сумма в облигациях',
-              border: OutlineInputBorder(),
-              suffixText: 'руб.',
-            ),
-          ),
+          
           const SizedBox(height: 10),
           TextField(
             controller: _currentGoldController,
@@ -577,6 +538,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   }
 
   Widget _buildFullCalculationTab() {
+    // Рассчитываем общую сумму текущих инвестиций
+    double totalCurrentInvestments = 0;
+    for (var entry in _stockInfo.entries) {
+      totalCurrentInvestments +=
+          double.tryParse(entry.value['controller'].text) ?? 0;
+    }
+
+    // Общая стоимость портфеля акций после покупки
+    double totalPortfolioAfter = totalCurrentInvestments + _totalStocksCost;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -639,9 +610,18 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                   final price = stockPrices[ticker] ?? 0;
                   final name = _stockInfo[ticker]!['name'];
                   final cost = lots * lotSize * price;
+
+                  // Сумма старых инвестиций в эту акцию
+                  double currentAmount =
+                      double.tryParse(_stockInfo[ticker]!['controller'].text) ??
+                      0;
+
+                  // Целевой процент
                   final idealPercentage = stocksDistribution[ticker]! * 100;
-                  final actualPercentage = (_totalStocksCost > 0)
-                      ? (cost / _totalStocksCost) * 100
+
+                  // Фактический процент ПОСЛЕ покупки
+                  double actualPercentage = totalPortfolioAfter > 0
+                      ? ((currentAmount + cost) / totalPortfolioAfter * 100)
                       : 0;
 
                   return Card(
@@ -665,6 +645,10 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          Text(
+                            'Текущие: ${currentAmount.toStringAsFixed(0)} руб. • Новые: ${cost.toStringAsFixed(0)} руб.',
+                            style: const TextStyle(fontSize: 12),
+                          ),
                         ],
                       ),
                       trailing: Text(
@@ -679,14 +663,28 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Общая стоимость: ${_totalStocksCost.toStringAsFixed(2)} руб.',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        Text(
+                          'Стоимость новых покупок: ${_totalStocksCost.toStringAsFixed(2)} руб.',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Общая стоимость портфеля акций: ${totalPortfolioAfter.toStringAsFixed(2)} руб.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        if (totalCurrentInvestments > 0) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'Текущие инвестиции: ${totalCurrentInvestments.toStringAsFixed(2)} руб.',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
