@@ -32,7 +32,7 @@ class InvestmentScreen extends StatefulWidget {
 class _InvestmentScreenState extends State<InvestmentScreen> {
   final TextEditingController _currentStocksController =
       TextEditingController();
- 
+
   final TextEditingController _currentGoldController = TextEditingController();
   final TextEditingController _currentYanController = TextEditingController();
   final TextEditingController _newFundsController = TextEditingController();
@@ -48,11 +48,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'SNGSP': {
-      'name': 'Сургутнефтегаз-п',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
+
     'NVTK': {
       'name': 'Новатэк',
       'lotSize': 1,
@@ -68,16 +64,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'TATNP': {
-      'name': 'Татнефть',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'NLMK': {
-      'name': 'НЛМК',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
+
     'T': {
       'name': 'T Технологии',
       'lotSize': 1,
@@ -89,8 +76,18 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'controller': TextEditingController(),
     },
     'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
+    'MGNT': {
+      'name': 'Магнит',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
     'MDMG': {
       'name': 'Мать и дитя',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'YDEX': {
+      'name': 'Yandex',
       'lotSize': 1,
       'controller': TextEditingController(),
     },
@@ -101,17 +98,21 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'SBER': 0.12,
-    'LKOH': 0.11,
+    // сырье/металлы 30%
+    'LKOH': 0.08,
     'NVTK': 0.11,
-    'PLZL': 0.10,
-    'TATNP': 0.08,
-    'SNGSP': 0.08,
-    'NLMK': 0.07,
-    'MTSS': 0.08,
-    'X5': 0.08,
-    'T': 0.08,
-    'MDMG': 0.09,
+    'PLZL': 0.11,
+    // финансы 15%
+    'SBER': 0.10,
+    'T': 0.05,
+    // потреб 20%
+    'X5': 0.12,
+    'MGNT': 0.08,
+    //телеком/it 20%
+    'MTSS': 0.10,
+    'YDEX': 0.10,
+    //здоровье 15%
+    'MDMG': 0.15,
   };
 
   Map<String, double> allocationResults = {
@@ -188,17 +189,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     FocusScope.of(context).unfocus();
 
     double currentStocks = double.tryParse(_currentStocksController.text) ?? 0;
-    
+
     double currentGold = double.tryParse(_currentGoldController.text) ?? 0;
     double currentYan = double.tryParse(_currentYanController.text) ?? 0;
     double newFunds = double.tryParse(_newFundsController.text) ?? 0;
 
-    double totalPortfolio =
-        currentStocks  + currentGold + currentYan + newFunds;
+    double totalPortfolio = currentStocks + currentGold + currentYan + newFunds;
 
     // Целевые суммы для каждого актива
     double targetStocks = totalPortfolio * 0.75;
- 
+
     double targetGold = totalPortfolio * 0.15;
     double targetYan = totalPortfolio * 0.10;
 
@@ -207,11 +207,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       0,
       double.infinity,
     );
-    
+
     double needGold = (targetGold - currentGold).clamp(0, double.infinity);
     double needYan = (targetYan - currentYan).clamp(0, double.infinity);
 
-    double totalNeed = needStocks  + needGold + needYan;
+    double totalNeed = needStocks + needGold + needYan;
     double remainingFunds = newFunds;
 
     // Если средств хватает - покупаем всё что нужно
@@ -219,7 +219,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       setState(() {
         buyRecommendations = {
           'Акции': needStocks,
-     
+
           'Золото': needGold,
           'Валюта': needYan,
         };
@@ -235,7 +235,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       setState(() {
         buyRecommendations = {
           'Акции': needStocks * ratio,
-       
+
           'Золото': needGold * ratio,
           'Валюта': needYan * ratio,
         };
@@ -249,7 +249,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
 
     // Обновляем фактические суммы с учетом купленного
     double actualStocks = currentStocks + buyRecommendations['Акции']!;
-    
+
     double actualGold = currentGold + buyRecommendations['Золото']!;
     double actualYan = currentYan + buyRecommendations['Валюта']!;
 
@@ -258,7 +258,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       allocationResults = {
         'Акции (${(actualStocks / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualStocks,
-       
+
         'Золото (${(actualGold / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualGold,
         'Валюта (${(actualYan / totalPortfolio * 100).toStringAsFixed(1)}%)':
@@ -437,7 +437,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
               suffixText: 'руб.',
             ),
           ),
-          
+
           const SizedBox(height: 10),
           TextField(
             controller: _currentGoldController,
