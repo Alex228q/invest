@@ -96,9 +96,9 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'controller': TextEditingController(),
     },
 
-    'EUTR': {
-      'name': 'ЕвроТранс',
-      'lotSize': 1,
+    'NLMK': {
+      'name': 'НЛМК',
+      'lotSize': 10,
       'controller': TextEditingController(),
     },
   };
@@ -108,18 +108,18 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    // сырье/металлы 30%
+    // сырье/металлы 35%
     'LKOH': 0.08,
     'NVTK': 0.08,
     'PLZL': 0.08,
     'PHOR': 0.06,
+    'NLMK': 0.05,
     // финансы 20%
     'SBER': 0.10,
     'T': 0.10,
-    // потреб 30%
+    // потреб 25%
     'X5': 0.10,
     'MGNT': 0.10,
-    'EUTR': 0.05,
     'MDMG': 0.05,
     //телеком/it 20%
     'MTSS': 0.10,
