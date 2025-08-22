@@ -32,7 +32,7 @@ class InvestmentScreen extends StatefulWidget {
 class _InvestmentScreenState extends State<InvestmentScreen> {
   final TextEditingController _currentStocksController =
       TextEditingController();
-  final TextEditingController _currentBondsController = TextEditingController();
+
   final TextEditingController _currentGoldController = TextEditingController();
   final TextEditingController _currentYanController = TextEditingController();
   final TextEditingController _newFundsController = TextEditingController();
@@ -43,62 +43,25 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   double _totalStocksCost = 0;
 
   final Map<String, Map<String, dynamic>> _stockInfo = {
-    'SBER': {
-      'name': 'Сбербанк',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'PHOR': {
-      'name': 'ФосАгро',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'NVTK': {
-      'name': 'Новатэк',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'PLZL': {
-      'name': 'Полюс',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
+    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
     'LKOH': {
       'name': 'Лукойл',
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-
-    'T': {
-      'name': 'T Технологии',
+    'SBER': {
+      'name': 'Сбербанк',
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'MTSS': {
-      'name': 'МТС',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
-    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
-    'MGNT': {
-      'name': 'Магнит',
+    'TRNFP': {
+      'name': 'Транснефть',
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'MDMG': {
-      'name': 'Мать и дитя',
+    'PHOR': {
+      'name': 'Фосагро',
       'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'RTKM': {
-      'name': 'Ростелеком',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
-
-    'NLMK': {
-      'name': 'НЛМК',
-      'lotSize': 10,
       'controller': TextEditingController(),
     },
   };
@@ -108,27 +71,15 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    // сырье/металлы 35%
-    'LKOH': 0.08,
-    'NVTK': 0.08,
-    'PLZL': 0.08,
-    'PHOR': 0.06,
-    'NLMK': 0.05,
-    // финансы 20%
-    'SBER': 0.10,
-    'T': 0.10,
-    // потреб 25%
-    'X5': 0.10,
-    'MGNT': 0.10,
-    'MDMG': 0.05,
-    //телеком/it 20%
-    'MTSS': 0.10,
-    'RTKM': 0.10,
+    'X5': 0.20,
+    'LKOH': 0.20,
+    'SBER': 0.20,
+    'TRNFP': 0.20,
+    'PHOR': 0.20,
   };
 
   Map<String, double> allocationResults = {
-    'Акции (50%)': 0,
-    'Облигации (25%)': 0,
+    'Акции (75%)': 0,
     'Золото (15%)': 0,
     'Валюта (10%)': 0,
   };
@@ -202,17 +153,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     FocusScope.of(context).unfocus();
 
     double currentStocks = double.tryParse(_currentStocksController.text) ?? 0;
-    double currentBonds = double.tryParse(_currentBondsController.text) ?? 0;
+
     double currentGold = double.tryParse(_currentGoldController.text) ?? 0;
     double currentYan = double.tryParse(_currentYanController.text) ?? 0;
     double newFunds = double.tryParse(_newFundsController.text) ?? 0;
 
-    double totalPortfolio =
-        currentStocks + currentBonds + currentGold + currentYan + newFunds;
+    double totalPortfolio = currentStocks + currentGold + currentYan + newFunds;
 
     // Целевые суммы для каждого актива
-    double targetStocks = totalPortfolio * 0.50;
-    double targetBonds = totalPortfolio * 0.25;
+    double targetStocks = totalPortfolio * 0.75;
+
     double targetGold = totalPortfolio * 0.15;
     double targetYan = totalPortfolio * 0.10;
 
@@ -221,11 +171,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       0,
       double.infinity,
     );
-    double needBonds = (targetBonds - currentBonds).clamp(0, double.infinity);
+
     double needGold = (targetGold - currentGold).clamp(0, double.infinity);
     double needYan = (targetYan - currentYan).clamp(0, double.infinity);
 
-    double totalNeed = needStocks + needBonds + needGold + needYan;
+    double totalNeed = needStocks + needGold + needYan;
     double remainingFunds = newFunds;
 
     // Если средств хватает - покупаем всё что нужно
@@ -233,7 +183,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       setState(() {
         buyRecommendations = {
           'Акции': needStocks,
-          'Облигации': needBonds,
+
           'Золото': needGold,
           'Валюта': needYan,
         };
@@ -249,7 +199,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       setState(() {
         buyRecommendations = {
           'Акции': needStocks * ratio,
-          'Облигации': needBonds * ratio,
+
           'Золото': needGold * ratio,
           'Валюта': needYan * ratio,
         };
@@ -263,7 +213,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
 
     // Обновляем фактические суммы с учетом купленного
     double actualStocks = currentStocks + buyRecommendations['Акции']!;
-    double actualBonds = currentBonds + buyRecommendations['Облигации']!;
+
     double actualGold = currentGold + buyRecommendations['Золото']!;
     double actualYan = currentYan + buyRecommendations['Валюта']!;
 
@@ -272,8 +222,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       allocationResults = {
         'Акции (${(actualStocks / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualStocks,
-        'Облигации (${(actualBonds / totalPortfolio * 100).toStringAsFixed(1)}%)':
-            actualBonds,
+
         'Золото (${(actualGold / totalPortfolio * 100).toStringAsFixed(1)}%)':
             actualGold,
         'Валюта (${(actualYan / totalPortfolio * 100).toStringAsFixed(1)}%)':
