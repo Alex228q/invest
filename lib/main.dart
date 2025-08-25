@@ -43,10 +43,15 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   double _totalStocksCost = 0;
 
   final Map<String, Map<String, dynamic>> _stockInfo = {
-    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
     'LKOH': {
       'name': 'Лукойл',
       'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+
+    'LSNGP': {
+      'name': 'ЛенЭнерго',
+      'lotSize': 10,
       'controller': TextEditingController(),
     },
     'SBER': {
@@ -54,14 +59,15 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'TRNFP': {
-      'name': 'Транснефть',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
+
     'PHOR': {
       'name': 'Фосагро',
       'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'GMKN': {
+      'name': 'Норникель',
+      'lotSize': 10,
       'controller': TextEditingController(),
     },
   };
@@ -71,11 +77,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'X5': 0.20,
-    'LKOH': 0.20,
-    'SBER': 0.20,
-    'TRNFP': 0.20,
-    'PHOR': 0.20,
+    'PHOR': 0.15,
+    'LKOH': 0.25,
+    'LSNGP': 0.15,
+    'GMKN': 0.20,
+    'SBER': 0.25,
   };
 
   Map<String, double> allocationResults = {
