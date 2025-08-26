@@ -48,16 +48,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'NVTK': {
-      'name': 'Новатэк',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'GMKN': {
-      'name': 'Норникель',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
 
     'LSNGP': {
       'name': 'ЛенЭнерго',
@@ -70,6 +60,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'controller': TextEditingController(),
     },
 
+    'TRNFP': {
+      'name': 'Транснефть',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
     'PHOR': {
       'name': 'Фосагро',
       'lotSize': 1,
@@ -82,12 +77,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'PHOR': 0.15,
-    'LKOH': 0.25,
-    'LSNGP': 0.15,
-    'GMKN': 0.10,
-    'NVTK': 0.10,
-    'SBER': 0.25,
+    'PHOR': 0.20,
+    'LKOH': 0.20,
+    'LSNGP': 0.20,
+    'TRNFP': 0.20,
+    'SBER': 0.20,
   };
 
   Map<String, double> allocationResults = {
