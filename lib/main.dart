@@ -48,6 +48,16 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
+    'NVTK': {
+      'name': 'Новатэк',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'GMKN': {
+      'name': 'Норникель',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
 
     'LSNGP': {
       'name': 'ЛенЭнерго',
@@ -65,11 +75,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'GMKN': {
-      'name': 'Норникель',
-      'lotSize': 10,
-      'controller': TextEditingController(),
-    },
   };
 
   Map<String, double?> stockPrices = {};
@@ -80,7 +85,8 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     'PHOR': 0.15,
     'LKOH': 0.25,
     'LSNGP': 0.15,
-    'GMKN': 0.20,
+    'GMKN': 0.10,
+    'NVTK': 0.10,
     'SBER': 0.25,
   };
 
