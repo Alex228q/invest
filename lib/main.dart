@@ -43,6 +43,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   double _totalStocksCost = 0;
 
   final Map<String, Map<String, dynamic>> _stockInfo = {
+    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
     'LKOH': {
       'name': 'Лукойл',
       'lotSize': 1,
@@ -70,7 +71,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
-    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
   };
 
   Map<String, double?> stockPrices = {};
