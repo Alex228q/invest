@@ -70,6 +70,7 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
+    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
   };
 
   Map<String, double?> stockPrices = {};
@@ -77,10 +78,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'PHOR': 0.15,
+    'PHOR': 0.115,
     'LKOH': 0.28,
-    'LSNGP': 0.15,
-    'TRNFP': 0.15,
+    'X5': 0.115,
+    'LSNGP': 0.11,
+    'TRNFP': 0.11,
     'SBER': 0.27,
   };
 
