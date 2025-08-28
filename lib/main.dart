@@ -77,11 +77,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   Map<String, double> actualAllocation = {};
 
   final Map<String, double> stocksDistribution = {
-    'PHOR': 0.20,
-    'LKOH': 0.20,
-    'LSNGP': 0.20,
-    'TRNFP': 0.20,
-    'SBER': 0.20,
+    'PHOR': 0.15,
+    'LKOH': 0.28,
+    'LSNGP': 0.15,
+    'TRNFP': 0.15,
+    'SBER': 0.27,
   };
 
   Map<String, double> allocationResults = {
