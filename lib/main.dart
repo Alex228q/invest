@@ -43,8 +43,14 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
   double _totalStocksCost = 0;
 
   final Map<String, Map<String, dynamic>> _stockInfo = {
+    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
     'LKOH': {
       'name': 'Лукойл',
+      'lotSize': 1,
+      'controller': TextEditingController(),
+    },
+    'NVTK': {
+      'name': 'Новатэк',
       'lotSize': 1,
       'controller': TextEditingController(),
     },
@@ -59,6 +65,11 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
       'lotSize': 1,
       'controller': TextEditingController(),
     },
+    'SNGSP': {
+      'name': 'Сургутнефтегаз',
+      'lotSize': 10,
+      'controller': TextEditingController(),
+    },
 
     'PHOR': {
       'name': 'Фосагро',
@@ -68,17 +79,6 @@ class _InvestmentScreenState extends State<InvestmentScreen> {
     'YDEX': {
       'name': 'Yandex',
       'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'NVTK': {
-      'name': 'Новатэк',
-      'lotSize': 1,
-      'controller': TextEditingController(),
-    },
-    'X5': {'name': 'X5', 'lotSize': 1, 'controller': TextEditingController()},
-    'SNGSP': {
-      'name': 'Сургутнефтегаз',
-      'lotSize': 10,
       'controller': TextEditingController(),
     },
   };
